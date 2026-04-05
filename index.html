@@ -25,12 +25,12 @@ button {padding:10px; margin:5px; border:none; border-radius:8px; cursor:pointer
 
 <br>
 
-<button class="btn-agregar" onclick="agregarRuta()">Agregar ruta</button>
-<button class="btn-analizar" onclick="analizarRutas()">Analizar</button>
-<button class="btn-mapa" onclick="verMapa()">Ver mapa</button>
+<button onclick="agregarRuta()">Agregar ruta</button>
+<button onclick="analizarRutas()">Analizar</button>
+<button onclick="verMapa()">Ver mapa</button>
 
 <div id="lista"></div>
-<h3 id="mejor" class="mejor"></h3>
+<h3 id="mejor"></h3>
 </div>
 
 <script>
@@ -53,7 +53,10 @@ function agregarRuta() {
 }
 
 function analizarRutas() {
-  if (rutas.length === 0) return;
+  if (rutas.length === 0) {
+    alert("Agrega al menos una ruta");
+    return;
+  }
 
   rutas.sort((a,b) => a.tiempo - b.tiempo);
   let mejor = rutas[0];
@@ -78,3 +81,4 @@ function verMapa() {
 
 </body>
 </html>
+
