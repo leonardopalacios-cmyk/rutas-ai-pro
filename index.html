@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>RUTAS AI PRO</title>
+<style>
+body {font-family: Arial; background:#1e1e2f; color:white; text-align:center;}
+.container {background:#2c2c3e; padding:20px; width:320px; margin:50px auto; border-radius:15px;}
+input {width:90%; padding:10px; margin:5px; border-radius:8px; border:none;}
+button {padding:10px; margin:5px; border:none; border-radius:8px; cursor:pointer; color:white;}
+.btn-agregar {background:#3498db;}
+.btn-analizar {background:#e67e22;}
+.btn-mapa {background:#2ecc71;}
+.mejor {color:#2ecc71; font-weight:bold;}
+</style>
+</head>
+
+<body>
+<div class="container">
+<h2>🚗 RUTAS AI PRO</h2>
+
+<input id="origen" placeholder="Origen">
+<input id="destino" placeholder="Destino">
+<input id="tiempo" placeholder="Tiempo (min)">
+
+<br>
+
+<button class="btn-agregar" onclick="agregarRuta()">Agregar ruta</button>
+<button class="btn-analizar" onclick="analizarRutas()">Analizar</button>
+<button class="btn-mapa" onclick="verMapa()">Ver mapa</button>
+
+<div id="lista"></div>
+<h3 id="mejor" class="mejor"></h3>
+</div>
+
+<script>
+let rutas = [];
+
+function agregarRuta() {
+  let origen = document.getElementById("origen").value;
+  let destino = document.getElementById("destino").value;
+  let tiempo = parseInt(document.getElementById("tiempo").value);
+
+  if (!origen || !destino || isNaN(tiempo)) {
+    alert("Llena todos los campos");
+    return;
+  }
+
+  rutas.push({origen, destino, tiempo});
+
+  document.getElementById("lista").innerHTML += 
+    <p>${origen} → ${destino} (${tiempo} min)</p>;
+}
+
+function analizarRutas() {
+  if (rutas.length === 0) return;
+
+  rutas.sort((a,b) => a.tiempo - b.tiempo);
+  let mejor = rutas[0];
+
+  document.getElementById("mejor").innerHTML =
+    🏆 Mejor ruta: ${mejor.origen} → ${mejor.destino} (${mejor.tiempo} min);
+}
+
+function verMapa() {
+  let origen = document.getElementById("origen").value;
+  let destino = document.getElementById("destino").value;
+
+  if (!origen || !destino) {
+    alert("Escribe origen y destino");
+    return;
+  }
+
+  let url = "https://www.google.com/maps/dir/" + origen + "/" + destino;
+  window.open(url, "_blank");
+}
+</script>
+
+</body>
+</html>
