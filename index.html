@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -14,82 +14,4 @@
         button:hover { background: #ff5e78; transform: translateY(-2px); }
         .map-panel { flex: 1; min-width: 400px; background: #16213e; border-radius: 20px; padding: 15px; height: 600px; border: 1px solid #00d4ff; }
         iframe { width: 100%; height: 100%; border-radius: 15px; border: none; }
-        .resultado-box { margin-top: 20px; padding: 15px; background: #0f3460; border-radius: 12px; border-left: 5px solid #2ecc71; display: none; animation: fadeIn 0.5s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    </style>
-</head>
-<body>
-
-    <div class="main-container">
-        <div class="panel">
-            <h2>🚗 RUTAS AI PRO</h2>
-            
-            <label>📍 ORIGEN</label>
-            <input type="text" id="origen" list="ciudades" placeholder="Desde dónde sales...">
-            
-            <label>🏁 DESTINO</label>
-            <input type="text" id="destino" list="ciudades" placeholder="A dónde vas...">
-
-            <!-- LISTA DE AUTOCOMPLETADO REAL -->
-            <datalist id="ciudades">
-                <option value="Ciudad de México, CDMX">
-                <option value="Toluca, Estado de México">
-                <option value="Puebla, Pue.">
-                <option value="Querétaro, Qro.">
-                <option value="Guadalajara, Jal.">
-                <option value="Monterrey, NL">
-                <option value="Cuernavaca, Mor.">
-                <option value="Pachuca, Hgo.">
-            </datalist>
-
-            <label>⛽ PRECIO GASOLINA ($ por Litro)</label>
-            <input type="number" id="precio" value="24.50" step="0.01">
-
-            <label>🏎‍🟀 RENDIMIENTO VEHÍCULO (KM / Litro)</label>
-            <input type="number" id="rendimiento" value="12" placeholder="Ej: 12">
-
-            <button onclick="calcularTodo()">🚀 GENERAR RUTA Y GASTO</button>
-            
-            <div id="resultado" class="resultado-box">
-                <b id="res-ruta" style="color: #00d4ff;"></b><br><br>
-                <span id="res-distancia"></span><br>
-                <b style="color:#2ecc71; font-size: 1.3em;" id="res-costo"></b>
-            </div>
-        </div>
-
-        <div class="map-panel">
-            <iframe id="mapaView" src="https://maps.google.com/maps?q=Mexico&output=embed"></iframe>
-        </div>
-    </div>
-
-    <script>
-        function calcularTodo() {
-            const origen = document.getElementById("origen").value;
-            const destino = document.getElementById("destino").value;
-            const precioGas = parseFloat(document.getElementById("precio").value);
-            const rendi = parseFloat(document.getElementById("rendimiento").value);
-
-            if(!origen || !destino) {
-                alert("Escribe una ruta válida");
-                return;
-            }
-
-            // Simulación de distancia real para el proyecto
-            const kmReales = Math.floor(Math.random() * (200 - 50) + 50);
-            
-            // FÓRMULA SOLICITADA: (KM / Rendimiento) * Precio
-            const costoFinal = (kmReales / rendi) * precioGas;
-
-            // Actualizar Mapa con la ruta escrita
-            const mapUrl = "https://www.google.com/maps?q=" + encodeURIComponent(origen) + "+to+" + encodeURIComponent(destino) + "&output=embed";
-            document.getElementById("mapaView").src = mapUrl;
-
-            // Mostrar resultados en el panel
-            document.getElementById("resultado").style.display = "block";
-            document.getElementById("res-ruta").innerText = "TRAYECTO: " + origen + " a " + destino;
-            document.getElementById("res-distancia").innerText = "📏 Distancia: " + kmReales + " KM aproximados";
-            document.getElementById("res-costo").innerText = "💰 Gasto Total: $" + costoFinal.toFixed(2);
-        }
-    </script>
-</body>
-</html>
+        .resultado-box {
