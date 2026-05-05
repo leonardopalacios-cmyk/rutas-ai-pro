@@ -1,17 +1,132 @@
-
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>🚀 RUTAS AI PRO - ENTREGA FINAL</title>
+    <title>🚀 RUTAS AI PRO - ULTRA EDITION</title>
+    <!-- Mapbox GL JS -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css" rel="stylesheet" />
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css" type="text/css">
+
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0a0a12; color: white; display: flex; justify-content: center; padding: 20px; }
-        .main-container { display: flex; gap: 20px; max-width: 1100px; width: 100%; flex-wrap: wrap; }
-        .panel { background: #16213e; padding: 25px; border-radius: 20px; width: 350px; border: 1px solid #e94560; box-shadow: 0 0 20px rgba(233, 69, 96, 0.3); }
-        h2 { color: #e94560; text-align: center; margin-top: 0; text-transform: uppercase; letter-spacing: 2px; }
-        label { font-size: 11px; color: #00d4ff; font-weight: bold; display: block; margin-bottom: 5px; }
-        input { width: 92%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #1f4068; background: #0a0a12; color: white; font-size: 14px; }
-        button { width: 100%; padding: 15px; background: #e94560; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4); }
-        button:hover { background: #ff5e78; transform: translateY(-2px); }
-        .map-panel { flex: 1; min-width: 400px; background: #16213e; border-radius: 20px; padding: 15px; height: 600px; border: 1px solid #00d4ff; }
-        iframe { width: 100%; height: 100%; border-radius: 15px; border: none; }
-        .resultado-box {
+        :root { --primary: #00f2ff; --accent: #7000ff; --bg: #050505; --card: #11111b; }
+        body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: white; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* Panel Lateral */
+        .sidebar { width: 380px; background: var(--card); padding: 30px; border-right: 1px solid #333; display: flex; flex-direction: column; box-shadow: 10px 0 30px rgba(0,0,0,0.5); z-index: 10; }
+        h1 { font-size: 24px; color: var(--primary); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 30px; text-align: center; }
+        
+        .input-group { margin-bottom: 20px; }
+        label { font-size: 10px; text-transform: uppercase; color: #888; letter-spacing: 1px; display: block; margin-bottom: 8px; }
+        
+        /* Estilo para los buscadores de Mapbox */
+        .mapboxgl-ctrl-geocoder { width: 100% !important; background: #1a1a2e !important; border: 1px solid #333 !important; border-radius: 8px !important; color: white !important; }
+        .mapboxgl-ctrl-geocoder--input { color: white !important; }
+        
+        input[type="number"] { width: 100%; background: #1a1a2e; border: 1px solid #333; padding: 12px; border-radius: 8px; color: white; box-sizing: border-box; }
+        
+        button { background: linear-gradient(45deg, var(--accent), var(--primary)); border: none; padding: 15px; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        button:hover { transform: scale(1.02); filter: brightness(1.2); }
+
+        /* Resultados */
+        .results { margin-top: 30px; padding: 20px; background: rgba(0, 242, 255, 0.05); border: 1px dashed var(--primary); border-radius: 12px; display: none; }
+        .stat { font-size: 18px; font-weight: bold; color: var(--primary); margin-top: 5px; }
+
+        /* Mapa */
+        #map { flex: 1; position: relative; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <h1>RUTA AI <span>PRO</span></h1>
+    
+    <div class="input-group">
+        <label>📍 Origen (Ciudad o Calle)</label>
+        <div id="geocoder-origen"></div>
+    </div>
+
+    <div class="input-group">
+        <label>🏁 Destino (Ciudad o Calle)</label>
+        <div id="geocoder-destino"></div>
+    </div>
+
+    <div class="input-group">
+        <label>⛽ Precio Gasolina ($/L)</label>
+        <input type="number" id="precio" value="24.50" step="0.01">
+    </div>
+
+    <div class="input-group">
+        <label>🏎️ Rendimiento (KM/L)</label>
+        <input type="number" id="rendimiento" value="12">
+    </div>
+
+    <button onclick="calcularRuta()">ANALIZAR TRAYECTO</button>
+
+    <div id="result-box" class="results">
+        <label>Distancia Estimada</label>
+        <div class="stat" id="dist-val">0 KM</div>
+        <label style="margin-top:15px">Gasto Proyectado</label>
+        <div class="stat" style="color: #2ecc71" id="cost-val">$0.00</div>
+    </div>
+</div>
+
+<div id="map"></div>
+
+<script>
+    // TOKEN DE ACCESO (Mantenlo para tu entrega)
+    mapboxgl.accessToken = 'pk.eyJ1IjoiZGV2LW1hcnRpbiIsImEiOiJjbG54Z2Z4Z2wwMTB0MmxvYXN4eHh3eGZpIn0.v5S0WfD0F0WfD0WfD0WfD0';
+
+    const map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/navigation-night-v1',
+        center: [-99.1332, 19.4326], // CDMX
+        zoom: 5
+    });
+
+    // Buscadores con autocompletado real de todo el mundo
+    const geocoderO = new MapboxGeocoder({ accessToken: mapboxgl.accessToken, mapboxgl: mapboxgl, placeholder: 'Buscar origen...' });
+    const geocoderD = new MapboxGeocoder({ accessToken: mapboxgl.accessToken, mapboxgl: mapboxgl, placeholder: 'Buscar destino...' });
+
+    document.getElementById('geocoder-origen').appendChild(geocoderO.onAdd(map));
+    document.getElementById('geocoder-destino').appendChild(geocoderD.onAdd(map));
+
+    let coordsO, coordsD;
+    geocoderO.on('result', (e) => coordsO = e.result.center);
+    geocoderD.on('result', (e) => coordsD = e.result.center);
+
+    function calcularRuta() {
+        if (!coordsO || !coordsD) return alert("Selecciona origen y destino de las sugerencias");
+
+        // Cálculo de distancia matemática (Fórmula Haversine simplificada)
+        const lon1 = coordsO[0], lat1 = coordsO[1], lon2 = coordsD[0], lat2 = coordsD[1];
+        const R = 6371; 
+        const dLat = (lat2-lat1) * Math.PI / 180;
+        const dLon = (lon2-lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        const distancia = (R * c) * 1.25; // +25% por curvas de carretera
+
+        const precio = parseFloat(document.getElementById('precio').value);
+        const rendi = parseFloat(document.getElementById('rendimiento').value);
+        const gasto = (distancia / rendi) * precio;
+
+        // Mostrar resultados
+        document.getElementById('result-box').style.display = 'block';
+        document.getElementById('dist-val').innerText = distancia.toFixed(1) + " KM";
+        document.getElementById('cost-val').innerText = "$" + gasto.toFixed(2);
+
+        // Zoom a la ruta
+        const bounds = new mapboxgl.LngLatBounds(coordsO, coordsD);
+        map.fitBounds(bounds, { padding: 100 });
+
+        // Marcadores
+        new mapboxgl.Marker({ color: '#00f2ff' }).setLngLat(coordsO).addTo(map);
+        new mapboxgl.Marker({ color: '#7000ff' }).setLngLat(coordsD).addTo(map);
+    }
+</script>
+
+</body>
+</html>
+
