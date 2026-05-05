@@ -1,114 +1,74 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>🚀 RUTAS AI PRO - ENTREGA FINAL</title>
+    <title>🚀 RUTAS AI PRO - FINAL</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0a0a12; color: white; display: flex; justify-content: center; padding: 20px; }
-        .main-container { display: flex; gap: 20px; max-width: 1000px; width: 100%; flex-wrap: wrap; }
-        .panel { background: #16213e; padding: 25px; border-radius: 20px; box-shadow: 0 0 30px rgba(0, 212, 255, 0.2); width: 340px; border: 1px solid #1f4068; }
-        h2 { color: #e94560; text-align: center; text-shadow: 0 0 10px #e94560; }
-        label { font-size: 12px; color: #00d4ff; font-weight: bold; }
-        input { width: 90%; padding: 10px; margin: 5px 0 15px 0; border-radius: 8px; border: none; background: #0a0a12; color: white; }
-        button { width: 100%; padding: 12px; margin: 5px 0; border: none; border-radius: 10px; cursor: pointer; color: white; font-weight: bold; transition: 0.3s; }
-        .btn-add { background: #00d4ff; color: #0a0a12; }
-        .btn-analizar { background: #e94560; }
-        .ruta-card { background: #1b1b2f; padding: 15px; margin-top: 10px; border-radius: 12px; border-left: 5px solid #00d4ff; }
-        #ganador { display: none; background: #091c09; border: 2px solid #2ecc71; padding: 15px; border-radius: 12px; margin-bottom: 15px; color: #2ecc71; text-align: center; }
-        .map-panel { flex: 1; min-width: 350px; background: #16213e; border-radius: 20px; padding: 15px; height: 550px; }
-        iframe { width: 100%; height: 90%; border-radius: 15px; border: none; }
+        body { font-family: sans-serif; background: #0a0a12; color: white; padding: 20px; display: flex; justify-content: center; }
+        .panel { background: #16213e; padding: 20px; border-radius: 15px; width: 350px; border: 1px solid #00d4ff; }
+        h2 { color: #e94560; text-align: center; }
+        input { width: 90%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; }
+        button { width: 100%; padding: 12px; margin: 5px 0; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; background: #00d4ff; }
+        .ruta-card { background: #1b1b2f; padding: 10px; margin-top: 10px; border-radius: 8px; border-left: 4px solid #e94560; }
     </style>
 </head>
 <body>
 
-    <div class="main-container">
-        <div class="panel">
-            <h2>🚗 RUTA AI PRO</h2>
-            <div id="ganador"></div>
+    <div class="panel">
+        <h2>🚗 RUTA AI PRO</h2>
+        
+        <label>📍 Origen:</label>
+        <input type="text" id="origen" list="ciudadesLista" placeholder="Escribe ciudad...">
+        
+        <label>🏁 Destino:</label>
+        <input type="text" id="destino" list="ciudadesLista" placeholder="Escribe ciudad...">
 
-            <label>📍 ORIGEN</label>
-            <input type="text" id="origen" list="ciudades" placeholder="Ej: CDMX">
-            
-            <label>🏁 DESTINO</label>
-            <input type="text" id="destino" list="ciudades" placeholder="Ej: Toluca">
-            
-            <!-- Lista para el Autocompletado -->
-            <datalist id="ciudades">
-                <option value="CDMX">
-                <option value="Toluca">
-                <option value="Querétaro">
-                <option value="Puebla">
-                <option value="Cuernavaca">
-                <option value="Monterrey">
-                <option value="Guadalajara">
-            </datalist>
+        <!-- ESTO ES EL AUTOCOMPLETADO -->
+        <datalist id="ciudadesLista">
+            <option value="Ciudad de México">
+            <option value="Toluca">
+            <option value="Puebla">
+            <option value="Querétaro">
+            <option value="Guadalajara">
+            <option value="Monterrey">
+            <option value="Cuernavaca">
+        </datalist>
 
-            <label>⛽ PRECIO GAS ($/Litro)</label>
-            <input type="number" id="gasPrecio" value="24">
+        <label>⛽ Precio Gas ($):</label>
+        <input type="number" id="precio" value="24">
 
-            <label>🏎‍🟀 RENDIMIENTO (KM por Litro)</label>
-            <input type="number" id="rendimiento" value="12" placeholder="¿Cuánto rinde tu carro?">
+        <label>🏎‍🟀 Rendimiento (KM/L):</label>
+        <input type="number" id="km_litro" value="12">
 
-            <button class="btn-add" onclick="agregarRuta()">✚ CALCULAR RUTA</button>
-            <button class="btn-analizar" onclick="analizar()">⚡ MEJOR OPCIÓN</button>
-            
-            <div id="lista-rutas"></div>
-        </div>
-
-        <div class="map-panel">
-            <h2 style="color: #00d4ff;">🗺️ VISOR IA</h2>
-            <iframe id="googleMap" src="about:blank"></iframe>
-        </div>
+        <button onclick="calcular()">CALCULAR AHORA</button>
+        
+        <div id="resultado"></div>
     </div>
 
     <script>
-        var misRutas = [];
+        function calcular() {
+            var ori = document.getElementById("origen").value;
+            var des = document.getElementById("destino").value;
+            var precio = parseFloat(document.getElementById("precio").value);
+            var rendi = parseFloat(document.getElementById("km_litro").value);
 
-        function agregarRuta() {
-            var o = document.getElementById("origen").value;
-            var d = document.getElementById("destino").value;
-            var p = parseFloat(document.getElementById("gasPrecio").value);
-            var r = parseFloat(document.getElementById("rendimiento").value);
+            if(!ori || !des) return alert("Pon origen y destino");
 
-            if (o == "" || d == "") return alert("Completa los campos");
-
-            // Lógica de cálculo real sugerida por el maestro
-            var kms = Math.floor(Math.random() * (100 - 10 + 1)) + 10; // KM aleatorios
-            var tiempo = Math.floor(kms * 1.2); // Tiempo estimado
+            // Simulamos distancia realista
+            var distancia = Math.floor(Math.random() * 80) + 10;
             
-            // FÓRMULA: (Kilómetros / Rendimiento) * Precio Litro
-            var costoTotal = ((kms / r) * p).toFixed(2);
+            // FÓRMULA SOLICITADA POR EL MAESTRO:
+            // (Distancia / Rendimiento) * Precio
+            var gasto = (distancia / rendi) * precio;
 
-            misRutas.push({ ori: o, des: d, tie: tiempo, km: kms, cos: costoTotal });
-
-            renderizar();
-            document.getElementById("googleMap").src = "https://www.google.com/maps?q=" + o + "+to+" + d + "&output=embed";
-            
-            document.getElementById("origen").value = "";
-            document.getElementById("destino").value = "";
-        }
-
-        function renderizar() {
-            var lista = document.getElementById("lista-rutas");
-            lista.innerHTML = "";
-            misRutas.forEach(rt => {
-                lista.innerHTML += `
+            var lista = document.getElementById("resultado");
+            lista.innerHTML = `
                 <div class="ruta-card">
-                    <b>${rt.ori} ➔ ${rt.des}</b><br>
-                    <small>📏 ${rt.km} km | ⏱️ ${rt.tie} min</small><br>
-                    <b style="color:#2ecc71">💰 Gasto: $${rt.cos}</b>
-                </div>`;
-            });
-        }
-
-        function analizar() {
-            if (misRutas.length == 0) return;
-            var mejor = misRutas.reduce((min, rt) => parseFloat(rt.cos) < parseFloat(min.cos) ? rt : min, misRutas[0]);
-            var res = document.getElementById("ganador");
-            res.style.display = "block";
-            res.innerHTML = "🏆 RUTA MÁS ECONÓMICA:<br>" + mejor.ori + " a " + mejor.des + "<br>Gasto: $" + mejor.cos;
+                    <b>${ori} a ${des}</b><br>
+                    📏 Distancia: ${distancia} km<br>
+                    <b style="color:#2ecc71">💰 Gasto Total: $${gasto.toFixed(2)}</b>
+                </div>` + lista.innerHTML;
         }
     </script>
 </body>
 </html>
-
